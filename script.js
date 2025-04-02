@@ -62,11 +62,16 @@ scene.traverse(function (object) {
   }
 });
 
+// Initialize info panel - FIXED: Show the initial instruction text
+const infoPanel = document.getElementById("info");
+infoPanel.style.display = "block"; // Show initially with default instruction text
+
 // Raycaster for interactivity - optimized with cache
 const raycaster = new THREE.Raycaster();
 const mouse = new THREE.Vector2();
 let lastInteraction = 0;
 
+// Function to handle all interactions (clicks, touches)
 function onInteract(event) {
   event.preventDefault();
 
@@ -76,37 +81,54 @@ function onInteract(event) {
   lastInteraction = now;
 
   const rect = renderer.domElement.getBoundingClientRect();
-  mouse.x = ((event.clientX - rect.left) / rect.width) * 2 - 1;
-  mouse.y = -((event.clientY - rect.top) / rect.height) * 2 + 1;
+
+  // Get correct coordinates based on event type
+  let clientX, clientY;
+  if (event.type === "touchstart" || event.type === "touchend") {
+    clientX = event.changedTouches[0].clientX;
+    clientY = event.changedTouches[0].clientY;
+  } else {
+    clientX = event.clientX;
+    clientY = event.clientY;
+  }
+
+  mouse.x = ((clientX - rect.left) / rect.width) * 2 - 1;
+  mouse.y = -((clientY - rect.top) / rect.height) * 2 + 1;
 
   raycaster.setFromCamera(mouse, camera);
   const intersects = raycaster.intersectObjects(
-    hexagramObjects.map((o) => o.sprite)
+    hexagramObjects.map((o) => o.sprite),
+    true
   );
 
   if (intersects.length > 0) {
     const hex = hexagramObjects.find(
       (o) => o.sprite === intersects[0].object
     ).data;
-    document.getElementById(
-      "info"
-    ).innerHTML = `<strong>${hex.number} - ${hex.simplifiedChinese} (${hex.pinyin}) - ${hex.english}</strong><br>
-                  <span style="font-family: monospace;">Lines: ${hex.lines}</span><br>
-                  <span>Level: ${hex.level}</span>`;
+
+    // Show and update the info panel
+    infoPanel.style.display = "block";
+    infoPanel.innerHTML = `
+      <strong>${hex.no} - ${hex.simplifiedChinese || ""} (${
+      hex.pinyin || ""
+    }) - ${hex.english || ""}</strong><br>
+      <span style="font-family: monospace;">Lines: ${hex.lines}</span><br>
+      <span>Level: ${hex.level || ""}</span>
+    `;
+
+    // Highlight the clicked hexagram by scaling it up slightly
+    intersects[0].object.scale.set(0.6, 0.6, 0.6);
+    setTimeout(() => {
+      intersects[0].object.scale.set(0.5, 0.5, 0.5);
+    }, 300);
   }
 }
 
-// Optimize event handlers with passive option where possible
-window.addEventListener("click", onInteract);
-window.addEventListener(
-  "touchstart",
-  (event) => {
-    if (event.touches.length === 1) {
-      onInteract(event.touches[0]);
-    }
-  },
-  { passive: false }
-);
+// Event Listeners for both desktop and mobile
+renderer.domElement.addEventListener("click", onInteract);
+renderer.domElement.addEventListener("touchend", onInteract, {
+  passive: false,
+});
 
 // Animation loop with optimized frame rate
 let autoRotate = true;
@@ -151,12 +173,14 @@ window.addEventListener("resize", () => {
   }, 250);
 });
 
-// Add reset button
-const resetButton = document.createElement("button");
-resetButton.textContent = "Reset View";
-document.body.appendChild(resetButton);
+// Add reset button with enhanced styling
+const resetButton = document.getElementById("resetButton");
 resetButton.addEventListener("click", () => {
   camera.position.set(0, 0, 5.5);
   controls.target.set(0, 0, 0);
   controls.update();
+
+  // FIXED: Reset info panel to show initial instruction text rather than hiding it
+  infoPanel.style.display = "block";
+  infoPanel.innerHTML = "Click on any hexagram to see details";
 });
