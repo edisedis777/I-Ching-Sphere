@@ -1,4 +1,4 @@
-// hexagramsRendering.js - Optimized version
+// hexagramsRendering.js - Optimized version for mobile
 import { hexagrams } from "./hexagramsData.js";
 
 export function positionHexagrams(THREE, scene, radius) {
@@ -8,49 +8,54 @@ export function positionHexagrams(THREE, scene, radius) {
   const level2Inner = [30, 57, 58]; // Level 2 inner hexagrams
   const level4Inner = [29, 51, 52]; // Level 4 inner hexagrams
 
-  // Create canvas textures only once for better performance
-  const textures = {};
+  // Texture canvas size - reduce for mobile performance
+  const canvasSize = window.innerWidth < 768 ? 96 : 128;
+
+  // Create textures only once for better performance
   const createTextureCanvas = (hex) => {
     const canvas = document.createElement("canvas");
-    canvas.width = 128;
-    canvas.height = 128;
+    canvas.width = canvasSize;
+    canvas.height = canvasSize;
     const ctx = canvas.getContext("2d");
 
     // White background with border
     ctx.fillStyle = "white";
-    ctx.fillRect(0, 0, 128, 128);
+    ctx.fillRect(0, 0, canvasSize, canvasSize);
     ctx.strokeStyle = "black";
     ctx.lineWidth = 2;
-    ctx.strokeRect(0, 0, 128, 128);
+    ctx.strokeRect(0, 0, canvasSize, canvasSize);
 
     // Add document-like lines
     ctx.fillStyle = "rgba(0, 0, 0, 0.1)";
     for (let i = 0; i < 8; i++) {
-      ctx.fillRect(10, 30 + i * 10, 108, 1);
+      ctx.fillRect(10, 30 + i * 10, canvasSize - 20, 1);
     }
 
     // Add hexagram number at the top
     ctx.fillStyle = "black";
     ctx.font = "bold 16px Arial";
     ctx.textAlign = "center";
-    ctx.fillText(`${hex.no}`, 64, 20);
+    ctx.fillText(`${hex.no}`, canvasSize / 2, 20);
 
     // Draw the hexagram lines (solid for 1, broken for 0)
     ctx.strokeStyle = "black";
     ctx.lineWidth = 2;
+    const centerX = canvasSize / 2;
+    const lineWidth = canvasSize / 3;
+
     for (let i = 0; i < 6; i++) {
       const y = 40 + i * 10; // Stack lines vertically
       ctx.beginPath();
       if (hex.lines[i] === "1") {
         // Solid line (yang)
-        ctx.moveTo(44, y);
-        ctx.lineTo(84, y);
+        ctx.moveTo(centerX - lineWidth / 2, y);
+        ctx.lineTo(centerX + lineWidth / 2, y);
       } else {
         // Broken line (yin)
-        ctx.moveTo(44, y);
-        ctx.lineTo(59, y);
-        ctx.moveTo(69, y);
-        ctx.lineTo(84, y);
+        ctx.moveTo(centerX - lineWidth / 2, y);
+        ctx.lineTo(centerX - lineWidth / 6, y);
+        ctx.moveTo(centerX + lineWidth / 6, y);
+        ctx.lineTo(centerX + lineWidth / 2, y);
       }
       ctx.stroke();
     }
@@ -58,13 +63,13 @@ export function positionHexagrams(THREE, scene, radius) {
     // Highlight the edges of the card to make it more visible
     ctx.strokeStyle = "rgba(0, 0, 0, 0.8)";
     ctx.lineWidth = 2;
-    ctx.strokeRect(2, 2, 124, 124);
+    ctx.strokeRect(2, 2, canvasSize - 4, canvasSize - 4);
 
     return canvas;
   };
 
-  // Pre-create commonly reused materials
-  const spriteMaterialCache = new Map();
+  // Determine sprite scale based on device size
+  const spriteScale = window.innerWidth < 768 ? 0.4 : 0.5;
 
   hexagrams.forEach((hex) => {
     let x, y, z;
@@ -90,18 +95,22 @@ export function positionHexagrams(THREE, scene, radius) {
     // Create texture canvas
     const canvas = createTextureCanvas(hex);
     const texture = new THREE.CanvasTexture(canvas);
+    texture.needsUpdate = true;
 
-    // Create material with optimized parameters
+    // Create material with optimized parameters for mobile
     const spriteMaterial = new THREE.SpriteMaterial({
       map: texture,
       sizeAttenuation: true,
       depthTest: false,
       depthWrite: false,
+      transparent: true,
+      opacity: 0.95,
     });
 
     const sprite = new THREE.Sprite(spriteMaterial);
     sprite.position.set(x, y, z);
-    sprite.scale.set(0.5, 0.5, 0.5);
+    sprite.scale.set(spriteScale, spriteScale, spriteScale);
+    sprite.userData = { hexagramNo: hex.no }; // Store reference for raycasting
 
     // Special highlighting for the pole hexagrams
     if (hex.no === 1) {
@@ -115,7 +124,8 @@ export function positionHexagrams(THREE, scene, radius) {
         "rgba(255, 0, 0, 0.3)",
         "red",
         "North",
-        y + 0.4
+        y + 0.4,
+        spriteScale
       );
     } else if (hex.no === 2) {
       // Blue highlighting for South pole (hexagram 2)
@@ -128,7 +138,8 @@ export function positionHexagrams(THREE, scene, radius) {
         "rgba(0, 0, 255, 0.3)",
         "blue",
         "South",
-        y - 0.4
+        y - 0.4,
+        spriteScale
       );
     }
 
@@ -149,7 +160,8 @@ function addHighlight(
   highlightColor,
   labelColor,
   labelText,
-  labelY
+  labelY,
+  scale
 ) {
   // Create highlight sprite
   const highlightCanvas = document.createElement("canvas");
@@ -165,11 +177,12 @@ function addHighlight(
     transparent: true,
     depthTest: false,
     depthWrite: false,
+    opacity: 0.7,
   });
 
   const highlight = new THREE.Sprite(highlightMaterial);
   highlight.position.set(x, y, z);
-  highlight.scale.set(0.55, 0.55, 0.55);
+  highlight.scale.set(scale * 1.1, scale * 1.1, scale * 1.1);
   scene.add(highlight);
 
   // Add label
@@ -196,20 +209,22 @@ function addHighlight(
   scene.add(label);
 }
 
-// Add a function to create grid lines on the sphere
+// Add a function to create grid lines on the sphere - optimized for mobile
 export function createSphereGrid(THREE, scene, radius) {
+  // Determine grid complexity based on device
+  const isMobile = window.innerWidth < 768;
   const material = new THREE.LineBasicMaterial({
     color: 0x0000ff,
     transparent: true,
-    opacity: 0.3,
+    opacity: isMobile ? 0.2 : 0.3,
     depthTest: false,
     depthWrite: false,
   });
 
-  // Optimize by creating fewer lines (reduced from 12 to 8 longitude lines)
-  const longitudeCount = 8;
-  const latitudeCount = 5;
-  const segmentCount = 24; // Reduced from 32 segments per line
+  // Reduce complexity on mobile
+  const longitudeCount = isMobile ? 6 : 8;
+  const latitudeCount = isMobile ? 4 : 5;
+  const segmentCount = isMobile ? 16 : 24;
 
   // Create longitude lines (vertical)
   for (let i = 0; i < longitudeCount; i++) {
@@ -230,7 +245,7 @@ export function createSphereGrid(THREE, scene, radius) {
     scene.add(line);
   }
 
-  // Create latitude lines (horizontal)
+  // Create fewer latitude lines (horizontal) on mobile for better performance
   for (let i = 1; i < latitudeCount; i++) {
     const theta = (i / latitudeCount) * Math.PI;
     const points = [];
