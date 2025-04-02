@@ -1,0 +1,117 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta
+      name="viewport"
+      content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no" />
+    <title>3D I Ching Sphere</title>
+    <style>
+      body {
+        margin: 0;
+        overflow: hidden;
+        background: #f0f0f0;
+        font-family: Arial, sans-serif;
+        touch-action: none; /* Prevent default touch behaviors like pinch-to-zoom */
+      }
+      #canvas {
+        width: 100vw;
+        height: 100vh;
+        display: block; /* Remove any default margins/padding */
+      }
+      #title {
+        position: absolute;
+        top: 1rem;
+        left: 50%;
+        transform: translateX(-50%);
+        background: rgba(255, 255, 255, 0.9);
+        padding: 0.5rem 1rem;
+        border-radius: 1rem;
+        box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
+        font-weight: bold;
+        font-size: clamp(14px, 4vw, 18px); /* Responsive font size */
+        white-space: nowrap;
+      }
+      #info {
+        position: absolute;
+        top: 4rem;
+        left: 1rem;
+        background: rgba(255, 255, 255, 0.9);
+        padding: 0.75rem;
+        border-radius: 0.25rem;
+        box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
+        max-width: 80vw; /* Limit width on mobile */
+        border-left: 4px solid #0066cc;
+        font-size: clamp(12px, 3vw, 16px); /* Responsive font size */
+        z-index: 10; /* Ensure it’s above the canvas */
+      }
+      .instructions {
+        position: absolute;
+        bottom: 5rem; /* Space for reset button */
+        left: 1rem;
+        background: rgba(255, 255, 255, 0.9);
+        padding: 0.5rem;
+        border-radius: 0.25rem;
+        font-size: clamp(10px, 2.5vw, 12px); /* Responsive font size */
+        max-width: 80vw; /* Limit width on mobile */
+        z-index: 10;
+      }
+      button {
+        position: absolute;
+        bottom: 1rem;
+        right: 1rem;
+        padding: 0.5rem 0.75rem;
+        background: #0066cc;
+        color: white;
+        border: none;
+        border-radius: 0.25rem;
+        cursor: pointer;
+        font-size: clamp(12px, 3vw, 16px); /* Responsive font size */
+        z-index: 10;
+      }
+      /* Media query for smaller screens */
+      @media (max-width: 768px) {
+        #title {
+          top: 0.5rem;
+          padding: 0.4rem 0.8rem;
+        }
+        #info {
+          top: 3rem;
+          left: 0.5rem;
+          padding: 0.5rem;
+          max-width: 90vw;
+        }
+        .instructions {
+          bottom: 4rem;
+          left: 0.5rem;
+          padding: 0.4rem;
+        }
+        button {
+          bottom: 0.5rem;
+          right: 0.5rem;
+          padding: 0.4rem 0.6rem;
+        }
+      }
+    </style>
+  </head>
+  <body>
+    <div id="canvas"></div>
+    <div id="title">I Ching Sphere</div>
+    <div id="info">Click on any hexagram to see details</div>
+    <div class="instructions">
+      <p><strong>Instructions:</strong></p>
+      <p>• Drag to rotate the sphere</p>
+      <p>• Pinch to zoom in/out</p>
+      <p>• Tap on any hexagram to view its details</p>
+    </div>
+    <script type="importmap">
+      {
+        "imports": {
+          "three": "https://unpkg.com/three@0.165.0/build/three.module.js",
+          "three/addons/": "https://unpkg.com/three@0.165.0/examples/jsm/"
+        }
+      }
+    </script>
+    <script type="module" src="script.js"></script>
+  </body>
+</html>
