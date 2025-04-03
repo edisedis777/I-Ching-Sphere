@@ -103,7 +103,7 @@ Each hexagram represents a unique situation or state, and the I Ching provides g
 ## 🛠️ Installation & Setup
 1. Clone the repository:
    ```
-   git clone https://github.com/your-username/i-ching-sphere.git
+   git clone https://github.com/edisedis777/i-ching-sphere.git
    cd i-ching-sphere
    ```
 
@@ -134,7 +134,6 @@ i-ching-sphere/
 ├── script.js               # Main application script
 ├── hexagramsRendering.js   # Hexagram positioning and rendering functions
 ├── hexagramsData.js        # Hexagram data and positioning data
-├── hexagrams.csv           # Source data for hexagrams
 └── README.md               # This file
 ```
 
