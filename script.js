@@ -113,7 +113,7 @@ function onInteract(event) {
       hex.pinyin || ""
     }) - ${hex.english || ""}</strong><br>
       <span style="font-family: monospace;">Lines: ${hex.lines}</span><br>
-      <span>Level: ${hex.level || ""}</span>
+      <span>Level: ${hex.level !== undefined ? hex.level : ""}</span>
     `;
 
     // Highlight the clicked hexagram by scaling it up slightly
