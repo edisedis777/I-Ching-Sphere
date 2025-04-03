@@ -160,7 +160,7 @@ Contributions are welcome! Please feel free to submit a Pull Request.
 5. Open a Pull Request
 
 ## 🙏 Credits
-- Three.js for the 3D rendering
+- This project was inspired by the work of Drasny József on the I Ching Globe. You can read more about it here: [I Ching Globe PDF](https://www.pascal-man.com/navigation/faq-java-browser/PDF-I-Ching/yiglobe.pdf)
 - [I Ching on Wikibooks](https://en.wikibooks.org/wiki/I_Ching/The_64_Hexagrams) for the hexagram data
 
 ## 📜 License
