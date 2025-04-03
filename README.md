@@ -18,8 +18,8 @@ An interactive 3D visualization of the I Ching hexagrams arranged in a spherical
 ## 🧩 About the I Ching
 The I Ching (易經), or "Book of Changes," is an ancient Chinese divination text dating back to the 9th century BCE. It consists of 64 hexagrams, each representing a unique archetype or situation. The hexagrams are composed of six horizontal lines that can be either solid (yang) or broken (yin), read from top to bottom. This application arranges these hexagrams in a spherical pattern, with special emphasis on the pole hexagrams:
 
-- **North Pole**: Hexagram 1 (乾 Qián) - "The Creative"
-- **South Pole**: Hexagram 2 (坤 Kūn) - "The Receptive"
+- **North Pole**: Hexagram 1 (乾 Qián) - "The Creative (Initiating)"
+- **South Pole**: Hexagram 2 (坤 Kūn) - "The Receptive (Responding)"
 
 The arrangement follows a logical pattern with multiple levels, thereby creating a spatial relationship between hexagrams.
 
