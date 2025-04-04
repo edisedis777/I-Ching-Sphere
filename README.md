@@ -19,7 +19,7 @@ An interactive 3D visualization of the I Ching hexagrams arranged in a spherical
 - **Performance Optimized**: Adaptive rendering based on device capabilities
 
 ## 🚀 Live Demo
-[Live Demo](edisedis777.github.io/I-Ching-Sphere/) 
+[Live Demo](https://edisedis777.github.io/I-Ching-Sphere/) 
 
 ## 🧩 About the I Ching
 The I Ching (易經), or "Book of Changes," is an ancient Chinese divination text dating back to the 9th century BCE. It consists of 64 hexagrams, each representing a unique archetype or situation. The hexagrams are composed of six horizontal lines that can be either solid (yang) or broken (yin), read from top to bottom. This application arranges these hexagrams in a spherical pattern, with special emphasis on the pole hexagrams:
