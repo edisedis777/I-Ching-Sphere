@@ -1,186 +1,196 @@
-import * as THREE from "three";
-import { OrbitControls } from "three/addons/controls/OrbitControls.js";
-import { positionHexagrams, createSphereGrid } from "./hexagramsRendering.js";
-
-// Initialize scene, camera, and renderer
-const scene = new THREE.Scene();
-const camera = new THREE.PerspectiveCamera(
-  65,
-  window.innerWidth / window.innerHeight,
-  0.1,
-  1000
-);
-const renderer = new THREE.WebGLRenderer({
-  antialias: true,
-  powerPreference: "high-performance", // Request high-performance GPU
-});
-renderer.setSize(window.innerWidth, window.innerHeight);
-renderer.setClearColor(0xf0f0f0);
-renderer.setPixelRatio(Math.min(window.devicePixelRatio, 2)); // Cap pixel ratio for mobile performance
-document.getElementById("canvas").appendChild(renderer.domElement);
-
-// Add lighting - simplified to one light for better performance
-const ambientLight = new THREE.AmbientLight(0xffffff, 2.0);
-scene.add(ambientLight);
-
-// Add orbit controls with optimized settings
-const controls = new OrbitControls(camera, renderer.domElement);
-controls.enableDamping = true;
-controls.dampingFactor = 0.05;
-controls.rotateSpeed = 0.5;
-controls.target.set(0, 0, 0);
-camera.position.set(0, 0, 5.5);
-controls.update();
-controls.enablePan = false; // Disable panning for better mobile experience
-controls.minDistance = 2; // Prevent zooming too close
-controls.maxDistance = 10; // Limit zoom out
-
-// Create the sphere with simplified geometry
-const radius = 2;
-const sphereGeometry = new THREE.SphereGeometry(radius, 24, 24); // Reduced from 32x32 to 24x24
-const sphereMaterial = new THREE.MeshPhongMaterial({
-  color: 0xadd8e6,
-  wireframe: false,
-  transparent: true,
-  opacity: 0.1,
-  side: THREE.DoubleSide,
-});
-const sphere = new THREE.Mesh(sphereGeometry, sphereMaterial);
-sphere.position.set(0, 0, 0);
-scene.add(sphere);
-
-// Add grid lines to the sphere
-createSphereGrid(THREE, scene, radius);
-
-// Position hexagrams
-const hexagramObjects = positionHexagrams(THREE, scene, radius);
-
-// Ensure all sprites and lines are rendered on top
-scene.traverse(function (object) {
-  if (object instanceof THREE.Sprite || object instanceof THREE.Line) {
-    object.renderOrder = 1;
-  }
-});
-
-// Initialize info panel - FIXED: Show the initial instruction text
-const infoPanel = document.getElementById("info");
-infoPanel.style.display = "block"; // Show initially with default instruction text
-
-// Raycaster for interactivity - optimized with cache
-const raycaster = new THREE.Raycaster();
-const mouse = new THREE.Vector2();
-let lastInteraction = 0;
-
-// Function to handle all interactions (clicks, touches)
-function onInteract(event) {
-  event.preventDefault();
-
-  // Throttle interactions to 100ms to improve performance
-  const now = Date.now();
-  if (now - lastInteraction < 100) return;
-  lastInteraction = now;
-
-  const rect = renderer.domElement.getBoundingClientRect();
-
-  // Get correct coordinates based on event type
-  let clientX, clientY;
-  if (event.type === "touchstart" || event.type === "touchend") {
-    clientX = event.changedTouches[0].clientX;
-    clientY = event.changedTouches[0].clientY;
-  } else {
-    clientX = event.clientX;
-    clientY = event.clientY;
-  }
-
-  mouse.x = ((clientX - rect.left) / rect.width) * 2 - 1;
-  mouse.y = -((clientY - rect.top) / rect.height) * 2 + 1;
-
-  raycaster.setFromCamera(mouse, camera);
-  const intersects = raycaster.intersectObjects(
-    hexagramObjects.map((o) => o.sprite),
-    true
-  );
-
-  if (intersects.length > 0) {
-    const hex = hexagramObjects.find(
-      (o) => o.sprite === intersects[0].object
-    ).data;
-
-    // Show and update the info panel
-    infoPanel.style.display = "block";
-    infoPanel.innerHTML = `
-      <strong>${hex.no} - ${hex.simplifiedChinese || ""} (${
-      hex.pinyin || ""
-    }) - ${hex.english || ""}</strong><br>
-      <span style="font-family: monospace;">Lines: ${hex.lines}</span><br>
-      <span>Level: ${hex.level !== undefined ? hex.level : ""}</span>
-    `;
-
-    // Highlight the clicked hexagram by scaling it up slightly
-    intersects[0].object.scale.set(0.6, 0.6, 0.6);
-    setTimeout(() => {
-      intersects[0].object.scale.set(0.5, 0.5, 0.5);
-    }, 300);
-  }
-}
-
-// Event Listeners for both desktop and mobile
-renderer.domElement.addEventListener("click", onInteract);
-renderer.domElement.addEventListener("touchend", onInteract, {
-  passive: false,
-});
-
-// Animation loop with optimized frame rate
-let autoRotate = true;
-let lastFrame = 0;
-const targetFPS = 60;
-const frameInterval = 1000 / targetFPS;
-
-function animate(timestamp) {
-  requestAnimationFrame(animate);
-
-  // Limit framerate for better performance
-  if (timestamp - lastFrame < frameInterval) return;
-  lastFrame = timestamp;
-
-  if (autoRotate) {
-    sphere.rotation.y += 0.001;
-  }
-
-  controls.update();
-  renderer.render(scene, camera);
-}
-animate();
-
-// Toggle auto-rotation when interacting with controls
-controls.addEventListener("start", function () {
-  autoRotate = false;
-});
-controls.addEventListener("end", function () {
-  setTimeout(() => {
-    autoRotate = true;
-  }, 3000);
-});
-
-// Handle window resize with debouncing
-let resizeTimeout;
-window.addEventListener("resize", () => {
-  clearTimeout(resizeTimeout);
-  resizeTimeout = setTimeout(() => {
-    camera.aspect = window.innerWidth / window.innerHeight;
-    camera.updateProjectionMatrix();
-    renderer.setSize(window.innerWidth, window.innerHeight);
-  }, 250);
-});
-
-// Add reset button with enhanced styling
-const resetButton = document.getElementById("resetButton");
-resetButton.addEventListener("click", () => {
-  camera.position.set(0, 0, 5.5);
-  controls.target.set(0, 0, 0);
-  controls.update();
-
-  // FIXED: Reset info panel to show initial instruction text rather than hiding it
-  infoPanel.style.display = "block";
-  infoPanel.innerHTML = "Click on any hexagram to see details";
-});
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta
+      name="viewport"
+      content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no" />
+    <title>I Ching Sphere</title>
+    <!-- Add favicon links -->
+    <link rel="icon" href="data:image/svg+xml,<svg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%220 0 100 100%22><text y=%22.9em%22 font-size=%2290%22>☯</text></svg>">
+    <style>
+      body {
+        margin: 0;
+        overflow: hidden;
+        background: #f0f0f0;
+        font-family: Arial, sans-serif;
+        touch-action: none;
+      }
+      #canvas {
+        width: 100vw;
+        height: 100vh;
+        display: block;
+        touch-action: none;
+      }
+      #title {
+        position: absolute;
+        top: 1rem;
+        left: 50%;
+        transform: translateX(-50%);
+        background: rgba(255, 255, 255, 0.9);
+        padding: 0.5rem 1rem;
+        border-radius: 1rem;
+        box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
+        font-weight: bold;
+        font-size: clamp(14px, 4vw, 18px);
+        white-space: nowrap;
+        z-index: 10;
+      }
+      #info {
+        position: absolute;
+        top: 4rem;
+        left: 1rem;
+        background: rgba(255, 255, 255, 0.95);
+        padding: 0.75rem;
+        border-radius: 0.25rem;
+        box-shadow: 0 2px 10px rgba(0, 0, 0, 0.2);
+        max-width: 80vw;
+        border-left: 4px solid #0066cc;
+        font-size: clamp(12px, 3vw, 16px);
+        z-index: 10;
+        transition: opacity 0.2s;
+      }
+      .instructions {
+        position: absolute;
+        bottom: 0.5rem;
+        left: 0.5rem;
+        background: rgba(255, 255, 255, 0.9);
+        padding: 0.5rem;
+        border-radius: 0.25rem;
+        font-size: clamp(10px, 2.5vw, 12px);
+        max-width: 80vw;
+        z-index: 10;
+        border-left: 4px solid #0066cc;
+        box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
+      }
+      .instructions p {
+        margin: 0.2rem 0;
+      }
+      #resetButton {
+        position: absolute;
+        bottom: 1rem;
+        right: 1rem;
+        padding: 0.5rem 0.75rem;
+        background: #0066cc;
+        color: white;
+        border: none;
+        border-radius: 0.25rem;
+        cursor: pointer;
+        font-size: clamp(12px, 3vw, 16px);
+        z-index: 10;
+        box-shadow: 0 2px 4px rgba(0, 0, 0, 0.2);
+        transition: background-color 0.2s;
+      }
+      #resetButton:hover {
+        background: #0055aa;
+      }
+      #resetButton:active {
+        transform: translateY(1px);
+      }
+      #errorOverlay {
+        display: none;
+        position: fixed;
+        top: 50%;
+        left: 50%;
+        transform: translate(-50%, -50%);
+        background: rgba(255, 255, 255, 0.95);
+        padding: 1rem;
+        border-radius: 0.5rem;
+        border-left: 4px solid #cc0000;
+        max-width: 80%;
+        box-shadow: 0 4px 12px rgba(0, 0, 0, 0.3);
+        z-index: 100;
+      }
+      @media (max-width: 768px) {
+        #title {
+          top: 0.5rem;
+          padding: 0.4rem 0.8rem;
+        }
+        #info {
+          top: 3rem;
+          left: 0.5rem;
+          padding: 0.5rem;
+          max-width: 90vw;
+        }
+        .instructions {
+          padding: 0.4rem;
+          font-size: clamp(9px, 2.5vw, 11px);
+        }
+        .instructions p {
+          margin: 0.1rem 0;
+        }
+        #resetButton {
+          bottom: 0.5rem;
+          right: 0.5rem;
+          padding: 0.4rem 0.6rem;
+        }
+      }
+    </style>
+  </head>
+  <body>
+    <div id="canvas"></div>
+    <div id="title">I Ching Sphere</div>
+    <div id="info">Click on any hexagram to see details</div>
+    <div class="instructions">
+      <p><strong>Instructions:</strong></p>
+      <p>• Drag to rotate the sphere</p>
+      <p>• Pinch to zoom in/out</p>
+      <p>• Tap on any hexagram to view its details</p>
+    </div>
+    <button id="resetButton">Reset View</button>
+    <div id="errorOverlay"></div>
+    
+    <script>
+      // Intercept network errors before loading modules
+      window.addEventListener('error', function(event) {
+        // Ignore favicon errors - they're harmless
+        if (event.target && event.target.tagName === 'LINK' && 
+            event.target.rel === 'icon' || event.target.href?.includes('favicon')) {
+          return;
+        }
+        
+        if (event.target && (event.target.tagName === 'SCRIPT' || event.target.tagName === 'LINK')) {
+          console.error('Resource loading error:', event);
+          document.getElementById('errorOverlay').style.display = 'block';
+          document.getElementById('errorOverlay').innerHTML = 
+            '<h3>Resource Loading Error</h3>' +
+            '<p>There was an error loading resources for this page. This might be due to CORS restrictions.</p>' +
+            '<p>Error details: ' + (event.target.src || event.target.href) + '</p>';
+        }
+      }, true);
+      
+      // Override fetch to catch CORS issues
+      const originalFetch = window.fetch;
+      window.fetch = function(url, options) {
+        if (url && url.toString().includes('jreader-bucket.s3.us-east-1.amazonaws.com')) {
+          console.warn('Blocked fetch request to:', url);
+          return Promise.resolve(new Response('', {
+            status: 200,
+            headers: { 'Content-Type': 'text/plain' }
+          }));
+        }
+        
+        // Also suppress favicon errors in fetch
+        if (url && url.toString().includes('favicon.ico')) {
+          console.warn('Ignoring favicon.ico request');
+          return Promise.resolve(new Response('', {
+            status: 200,
+            headers: { 'Content-Type': 'image/x-icon' }
+          }));
+        }
+        
+        return originalFetch.apply(this, arguments);
+      };
+    </script>
+    
+    <script type="importmap">
+      {
+        "imports": {
+          "three": "https://esm.sh/three@0.165.0",
+          "three/addons/": "https://esm.sh/three@0.165.0/examples/jsm/"
+        }
+      }
+    </script>
+    <script type="module" src="script.js"></script>
+  </body>
+</html>
