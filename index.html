@@ -6,6 +6,10 @@
       name="viewport"
       content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no" />
     <title>I Ching Sphere</title>
+    <!-- Add favicon links -->
+    <link
+      rel="icon"
+      href="data:image/svg+xml,<svg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%220 0 100 100%22><text y=%22.9em%22 font-size=%2290%22>☯</text></svg>" />
     <style>
       body {
         margin: 0;
@@ -85,6 +89,20 @@
       #resetButton:active {
         transform: translateY(1px);
       }
+      #errorOverlay {
+        display: none;
+        position: fixed;
+        top: 50%;
+        left: 50%;
+        transform: translate(-50%, -50%);
+        background: rgba(255, 255, 255, 0.95);
+        padding: 1rem;
+        border-radius: 0.5rem;
+        border-left: 4px solid #cc0000;
+        max-width: 80%;
+        box-shadow: 0 4px 12px rgba(0, 0, 0, 0.3);
+        z-index: 100;
+      }
       @media (max-width: 768px) {
         #title {
           top: 0.5rem;
@@ -122,6 +140,72 @@
       <p>• Tap on any hexagram to view its details</p>
     </div>
     <button id="resetButton">Reset View</button>
+    <div id="errorOverlay"></div>
+
+    <script>
+      // Intercept network errors before loading modules
+      window.addEventListener(
+        "error",
+        function (event) {
+          // Ignore favicon errors - they're harmless
+          if (
+            (event.target &&
+              event.target.tagName === "LINK" &&
+              event.target.rel === "icon") ||
+            event.target.href?.includes("favicon")
+          ) {
+            return;
+          }
+
+          if (
+            event.target &&
+            (event.target.tagName === "SCRIPT" ||
+              event.target.tagName === "LINK")
+          ) {
+            console.error("Resource loading error:", event);
+            document.getElementById("errorOverlay").style.display = "block";
+            document.getElementById("errorOverlay").innerHTML =
+              "<h3>Resource Loading Error</h3>" +
+              "<p>There was an error loading resources for this page. This might be due to CORS restrictions.</p>" +
+              "<p>Error details: " +
+              (event.target.src || event.target.href) +
+              "</p>";
+          }
+        },
+        true
+      );
+
+      // Override fetch to catch CORS issues
+      const originalFetch = window.fetch;
+      window.fetch = function (url, options) {
+        if (
+          url &&
+          url.toString().includes("jreader-bucket.s3.us-east-1.amazonaws.com")
+        ) {
+          console.warn("Blocked fetch request to:", url);
+          return Promise.resolve(
+            new Response("", {
+              status: 200,
+              headers: { "Content-Type": "text/plain" },
+            })
+          );
+        }
+
+        // Also suppress favicon errors in fetch
+        if (url && url.toString().includes("favicon.ico")) {
+          console.warn("Ignoring favicon.ico request");
+          return Promise.resolve(
+            new Response("", {
+              status: 200,
+              headers: { "Content-Type": "image/x-icon" },
+            })
+          );
+        }
+
+        return originalFetch.apply(this, arguments);
+      };
+    </script>
+
     <script type="importmap">
       {
         "imports": {
