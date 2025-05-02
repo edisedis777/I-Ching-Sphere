@@ -5,7 +5,6 @@
 [![JavaScript](https://img.shields.io/badge/JavaScript-F7DF1E?logo=javascript&logoColor=000)](#)
 [![Three.js](https://img.shields.io/badge/Three.js-000?logo=threedotjs&logoColor=fff)](#)
 [![Markdown](https://img.shields.io/badge/Markdown-%23000000.svg?logo=markdown&logoColor=white)](#)
-[![License: MIT](https://img.shields.io/badge/License-MIT-blue.svg)](https://opensource.org/licenses/MIT)
 
 An interactive 3D visualization of the I Ching hexagrams arranged in a spherical formation. This project uses Three.js to create an immersive, explorable representation of the 64 hexagrams of the I Ching.
 
@@ -164,4 +163,4 @@ Contributions are welcome! Please feel free to submit a Pull Request.
 - [I Ching on Wikibooks](https://en.wikibooks.org/wiki/I_Ching/The_64_Hexagrams) for the hexagram data
 
 ## 📜 License
-This project is licensed under the MIT License - see the [LICENSE](LICENSE) file for details.
+Distributed under the GNU Affero General Public License v3.0 License. See `LICENSE` for more information.
