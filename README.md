@@ -6,12 +6,12 @@
 [![Three.js](https://img.shields.io/badge/Three.js-000?logo=threedotjs&logoColor=fff)](#)
 [![Markdown](https://img.shields.io/badge/Markdown-%23000000.svg?logo=markdown&logoColor=white)](#)
 
-- An interactive 3D visualization of the I Ching hexagrams arranged in a spherical formation. This project uses Three.js to create an immersive, explorable representation of the 64 hexagrams of the I Ching. 
+An interactive 3D visualization of the I Ching hexagrams arranged in a spherical formation.
 
-  ALWAYS REMEMBER what Lao Tzu said: **"The Tao that can be spoken is not the eternal Tao."**
+ALWAYS REMEMBER what Lao Tzu said: **"The Tao that can be spoken is not the eternal Tao."**
 
-  This is only a 3D representation of a 6D structure. This is only one portion or slice of 
-  the entity. Additionally, the I-Ching is always moving through space and time. This further complicates things.
+This is only a 3D representation of a 6D structure. This is only one portion or slice of 
+the entity. Additionally, the I-Ching is always moving through space and time. This further complicates things.
 
 ![Screenshot](https://github.com/user-attachments/assets/887a526e-2b93-40dc-a05e-f78858bd3d24)
 
