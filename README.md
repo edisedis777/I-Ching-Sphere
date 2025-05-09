@@ -26,7 +26,7 @@ the entity. Additionally, the I-Ching is always moving through space and time. T
 [Live Demo](https://edisedis777.github.io/I-Ching-Sphere/) 
 
 ## 🧩 About the I Ching
-The I Ching (易經), or "Book of Changes," is an ancient Chinese divination text dating back to the 9th century BCE. It consists of 64 hexagrams, each representing a unique archetype or situation. The hexagrams are composed of six horizontal lines that can be either solid (yang) or broken (yin), read from top to bottom. This application arranges these hexagrams in a spherical pattern, with special emphasis on the pole hexagrams:
+The I Ching (易經), or "Book of Changes," is an ancient Chinese text dating back to the 9th century BCE. It is not just a divination text, but rather a teacher of phylosophy. It consists of 64 hexagrams, each representing a unique archetype or situation. The hexagrams are composed of six horizontal lines that can be either solid (yang) or broken (yin), read from top to bottom. This application arranges these hexagrams in a spherical pattern, with special emphasis on the pole hexagrams:
 
 - **North Pole**: Hexagram 1 (乾 Qián) - "The Creative (Initiating)"
 - **South Pole**: Hexagram 2 (坤 Kūn) - "The Receptive (Responding)"
